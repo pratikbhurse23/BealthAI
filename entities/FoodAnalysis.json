@@ -1,0 +1,75 @@
+{
+  "name": "FoodAnalysis",
+  "type": "object",
+  "properties": {
+    "food_name": {
+      "type": "string",
+      "description": "Identified food name"
+    },
+    "food_category": {
+      "type": "string",
+      "enum": [
+        "healthy",
+        "moderate",
+        "unhealthy"
+      ],
+      "description": "Health category of the food"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL of the uploaded food image"
+    },
+    "calories": {
+      "type": "number",
+      "description": "Calories in kcal"
+    },
+    "protein": {
+      "type": "number",
+      "description": "Protein in grams"
+    },
+    "carbs": {
+      "type": "number",
+      "description": "Carbohydrates in grams"
+    },
+    "fats": {
+      "type": "number",
+      "description": "Fats in grams"
+    },
+    "fiber": {
+      "type": "number",
+      "description": "Fiber in grams"
+    },
+    "sugar": {
+      "type": "number",
+      "description": "Sugar in grams"
+    },
+    "vitamins": {
+      "type": "string",
+      "description": "JSON string of vitamins and minerals"
+    },
+    "health_warning": {
+      "type": "string",
+      "description": "Health warning if food is unhealthy"
+    },
+    "exercises": {
+      "type": "string",
+      "description": "JSON string of recommended exercises"
+    },
+    "healthier_alternatives": {
+      "type": "string",
+      "description": "Suggested healthier alternatives"
+    },
+    "serving_size": {
+      "type": "string",
+      "description": "Standard serving size"
+    },
+    "analysis_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of analysis"
+    }
+  },
+  "required": [
+    "food_name"
+  ]
+}

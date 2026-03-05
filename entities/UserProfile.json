@@ -1,0 +1,62 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "age": {
+      "type": "number",
+      "description": "User's age in years"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female"
+      ],
+      "description": "User's gender for BMR calculation"
+    },
+    "weight_kg": {
+      "type": "number",
+      "description": "Current weight in kilograms"
+    },
+    "height_cm": {
+      "type": "number",
+      "description": "Height in centimetres"
+    },
+    "activity_level": {
+      "type": "string",
+      "enum": [
+        "sedentary",
+        "active",
+        "athlete"
+      ],
+      "default": "sedentary",
+      "description": "Daily activity level"
+    },
+    "weight_goal": {
+      "type": "string",
+      "description": "Weight goal e.g. Lose 5kg, Gain 3kg, Maintain"
+    },
+    "goal_weight_kg": {
+      "type": "number",
+      "description": "Target weight in kilograms"
+    },
+    "start_weight_kg": {
+      "type": "number",
+      "description": "Starting weight when goal was set"
+    },
+    "medical_conditions": {
+      "type": "string",
+      "description": "JSON string of medical conditions (diabetes, hypertension, heart)"
+    },
+    "doctor_calorie_target": {
+      "type": "number",
+      "description": "Doctor-prescribed daily calorie target for users with medical conditions"
+    }
+  },
+  "required": [
+    "age",
+    "gender",
+    "weight_kg",
+    "height_cm"
+  ]
+}

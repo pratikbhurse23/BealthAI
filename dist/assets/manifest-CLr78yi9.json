@@ -1,0 +1,8 @@
+{
+    "name": "Bealthai App",
+    "short_name": "Bealthai",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff"
+}

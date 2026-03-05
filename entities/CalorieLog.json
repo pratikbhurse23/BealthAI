@@ -1,0 +1,49 @@
+{
+  "name": "CalorieLog",
+  "type": "object",
+  "properties": {
+    "food_name": {
+      "type": "string",
+      "description": "Name of the food"
+    },
+    "calories": {
+      "type": "number",
+      "description": "Calories consumed"
+    },
+    "protein": {
+      "type": "number"
+    },
+    "carbs": {
+      "type": "number"
+    },
+    "fats": {
+      "type": "number"
+    },
+    "serving_size": {
+      "type": "string"
+    },
+    "meal_type": {
+      "type": "string",
+      "enum": [
+        "breakfast",
+        "lunch",
+        "dinner",
+        "snack"
+      ],
+      "default": "snack"
+    },
+    "log_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "food_analysis_id": {
+      "type": "string",
+      "description": "Reference to FoodAnalysis record"
+    }
+  },
+  "required": [
+    "food_name",
+    "calories",
+    "log_date"
+  ]
+}
