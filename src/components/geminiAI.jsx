@@ -1,4 +1,5 @@
 // Free Gemini AI — get a free key at https://aistudio.google.com/app/apikey
+import { callGemini } from "../lib/aiWrapper";
 
 const GEMINI_KEY_STORAGE = "nutriscan_gemini_key";
 
@@ -24,9 +25,6 @@ function fileToBase64(file) {
 }
 
 export async function analyzeFood(imageFile) {
-  const apiKey = getGeminiKey();
-  if (!apiKey) throw new Error("NO_API_KEY");
-
   const base64 = await fileToBase64(imageFile);
   const mimeType = imageFile.type || "image/jpeg";
 
@@ -34,66 +32,97 @@ export async function analyzeFood(imageFile) {
 {"food_name":"","food_category":"healthy|moderate|unhealthy","serving_size":"","calories":0,"protein":0,"carbs":0,"fats":0,"fiber":0,"sugar":0,"vitamins":[{"name":"","amount":""}],"health_warning":"","exercises":[{"name":"","duration":"","intensity":"low|moderate|high","calories_burned":0,"description":""}],"healthier_alternatives":""}
 Nutrition per standard serving. health_warning and healthier_alternatives only if unhealthy/moderate.`;
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: base64 } }] }],
-        generationConfig: { responseMimeType: "application/json" }
-      })
-    }
-  );
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    if (response.status === 400 || response.status === 403) throw new Error("INVALID_KEY");
-    throw new Error(err?.error?.message || "AI request failed");
+  try {
+    const raw = await callGemini(prompt, base64, mimeType);
+    if (!raw) throw new Error("AI request failed");
+    return raw;
+  } catch (err) {
+    const msg = err?.message || "";
+    if (msg.includes("400") || msg.includes("403") || msg.includes("INVALID_KEY")) throw new Error("INVALID_KEY");
+    throw new Error(msg || "AI request failed");
   }
-
-  const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-  const raw = JSON.parse(text);
-  return raw;
 }
 
-export async function generateDietPlan(recentFoods) {
-  const apiKey = getGeminiKey();
-  if (!apiKey) throw new Error("NO_API_KEY");
-
+export async function generateDietPlan(userProfile, recentFoods = []) {
   const foodList = recentFoods.length
-    ? recentFoods.map((a) => `${a.food_name} (${a.calories} kcal, ${a.food_category})`).join(", ")
+    ? recentFoods.map((a) => `${a.food_name} (${a.calories} kcal)`).join(", ")
     : "No recent data";
 
-  const prompt = `You are a certified nutritionist. Generate a personalized daily diet plan.
+  const {
+    name = "User",
+    age = 30,
+    gender = "Not specified",
+    height = 170,
+    weight = 70,
+    goal = "maintain",
+    activityLevel = "moderate",
+    diet_preference = "Not specified"
+  } = userProfile || {};
 
-Recent foods eaten: ${foodList}
+  const prompt = `You are an expert sports nutritionist and dietitian. Generate a personalized 1-day diet plan for this user.
+
+USER PROFILE:
+Name: ${name}
+Age: ${age}
+Gender: ${gender}
+Height: ${height} cm
+Weight: ${weight} kg
+Primary Goal: ${goal}
+Activity Level: ${activityLevel}
+Diet Preference: ${diet_preference}
+
+Foods recently eaten (avoid if possible for variety): ${foodList}
+
+Create a specific, actionable meal plan that hits their daily calorie and macronutrient targets based on their profile. 
+The foods MUST align with their Diet Preference (e.g., if Vegan, no dairy/meat; if Jain, no root vegetables).
 
 Return ONLY valid JSON (no markdown):
 {
-  "plan_name": "string",
+  "plan_name": "string (e.g., High-Protein Fat Loss Plan)",
   "daily_calorie_goal": 2000,
-  "meals": [{"time_label": "string", "suggestion": "string", "calories": 0}],
-  "notification_times": ["7:30 AM"]
+  "daily_macros": {
+    "protein": 150,
+    "carbs": 200,
+    "fats": 65
+  },
+  "meals": [
+    {
+      "type": "Breakfast",
+      "time_label": "8:00 AM",
+      "food_items": [
+        { "name": "Oatmeal with berries", "portion": "1 bowl (200g)", "calories": 300, "protein": 10, "carbs": 50, "fats": 5 }
+      ],
+      "total_calories": 300
+    },
+    {
+      "type": "Lunch",
+      "time_label": "1:00 PM",
+      "food_items": [...],
+      "total_calories": 0
+    },
+    {
+      "type": "Snack",
+      "time_label": "4:30 PM",
+      "food_items": [...],
+      "total_calories": 0
+    },
+    {
+      "type": "Dinner",
+      "time_label": "8:00 PM",
+      "food_items": [...],
+      "total_calories": 0
+    }
+  ],
+  "hydration_tip": "string"
 }
 
-Include 5-6 balanced meals. Focus on healthy nutrition.`;
+Ensure exactly 4 meal segments: Breakfast, Lunch, Snack, Dinner. Make the foods realistic and specific.`;
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" }
-      })
-    }
-  );
-
-  if (!response.ok) throw new Error("AI request failed");
-  const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-  return JSON.parse(text);
+  try {
+    const raw = await callGemini(prompt);
+    if (!raw) throw new Error("AI request failed");
+    return raw;
+  } catch (err) {
+    throw new Error(err?.message || "AI request failed");
+  }
 }

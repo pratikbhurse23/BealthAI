@@ -4,13 +4,13 @@ import PullToRefresh from "../components/PullToRefresh";
 import { Activity, Plus, Trash2, Flame, Beef, Wheat, Droplets } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import BottomSheetSelect from "../components/BottomSheetSelect";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Progress } from "../components/ui/progress";
 import { calorieStore, analysesStore } from "../components/localStore";
 import { calcBMR, calcTDEE, calcCalorieBudget } from "../components/bmr";
 import { api } from "../api/client";
+import FoodSearch from "../components/food/FoodSearch";
 
 const mealColors = {
   breakfast: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -118,6 +118,22 @@ export default function CalorieTracker() {
       unit: "g",
     });
     setShowAdd(true);
+  };
+
+  const handleDirectAdd = (food) => {
+    if (!food.food_name || !food.calories) return;
+    calorieStore.add({
+      food_name: food.food_name,
+      calories: food.calories || 0,
+      protein: food.protein || 0,
+      carbs: food.carbs || 0,
+      fats: food.fats || 0,
+      meal_type: "snack",
+      quantity: 100,
+      unit: "g",
+      log_date: selectedDate,
+    });
+    setLogs(calorieStore.listByDate(selectedDate));
   };
 
   return (
@@ -246,6 +262,33 @@ export default function CalorieTracker() {
               <DialogTitle className="dark:text-white">Log Food</DialogTitle>
             </DialogHeader>
             <div className="space-y-3 pt-2">
+              {/* Inline food search to pre-fill */}
+              <div className="mb-1">
+                <p className="text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Quick Search</p>
+                <FoodSearch
+                  onSelect={(item) => {
+                    setForm(f => ({
+                      ...f,
+                      food_name: item.food_name,
+                      base_calories: String(item.calories || ""),
+                      base_protein: String(item.protein || ""),
+                      base_carbs: String(item.carbs || ""),
+                      base_fats: String(item.fats || ""),
+                      calories: String(item.calories || ""),
+                      protein: String(item.protein || ""),
+                      carbs: String(item.carbs || ""),
+                      fats: String(item.fats || ""),
+                    }));
+                  }}
+                  onDirectAdd={(item) => {
+                    handleDirectAdd(item);
+                    setShowAdd(false);
+                  }}
+                />
+              </div>
+              <div className="border-t border-gray-100 dark:border-gray-800 pt-3">
+                <p className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Or enter manually</p>
+              </div>
               <Input placeholder="Food name *" value={form.food_name} onChange={(e) => setForm({ ...form, food_name: e.target.value })} className="rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
               <BottomSheetSelect
                 title="Meal Type"

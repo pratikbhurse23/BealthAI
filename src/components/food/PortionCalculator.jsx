@@ -1,10 +1,29 @@
 import React, { useState } from "react";
 import { api } from "../../api/client";
-import { Search, Loader2, Scale, AlertTriangle } from "lucide-react";
+import { Search, Loader2, Scale, Globe } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import BealthAlert from "./BealthAlert";
 import { INDIAN_FOOD_LIBRARY, matchFood } from "../indianFoodLibrary";
+
+function nationalityFlag(nat) {
+  if (!nat) return "";
+  const n = nat.toLowerCase();
+  if (n.includes("indian")) return "🇮🇳";
+  if (n.includes("italian")) return "🇮🇹";
+  if (n.includes("chinese")) return "🇨🇳";
+  if (n.includes("mexican")) return "🇲🇽";
+  if (n.includes("american")) return "🇺🇸";
+  if (n.includes("japanese")) return "🇯🇵";
+  if (n.includes("thai")) return "🇹🇭";
+  if (n.includes("french")) return "🇫🇷";
+  if (n.includes("greek")) return "🇬🇷";
+  if (n.includes("spanish")) return "🇪🇸";
+  if (n.includes("korean")) return "🇰🇷";
+  if (n.includes("turkish")) return "🇹🇷";
+  if (n.includes("global") || n.includes("international")) return "🌍";
+  return "🌐";
+}
 
 export default function PortionCalculator({ onLog }) {
   const [query, setQuery] = useState("");
@@ -24,7 +43,7 @@ export default function PortionCalculator({ onLog }) {
     setQuery(val);
     const local = localSearch(val);
     if (local.length) {
-      setResults(local.map(f => ({ food_name: f.food_name, calories: f.calories, protein: f.protein, carbs: f.carbs, fats: f.fats, fiber: f.fiber || 0, sugar: f.sugar || 0, source: "library" })));
+      setResults(local.map(f => ({ food_name: f.food_name, calories: f.calories, protein: f.protein, carbs: f.carbs, fats: f.fats, fiber: f.fiber || 0, sugar: f.sugar || 0, nationality: "Indian 🇮🇳", source: "library" })));
       setShowDropdown(true);
     } else {
       setResults([]);
@@ -39,18 +58,19 @@ export default function PortionCalculator({ onLog }) {
 
     const libraryMatch = matchFood(query);
     if (libraryMatch) {
-      setFood({ food_name: libraryMatch.food_name, calories: libraryMatch.calories, protein: libraryMatch.protein, carbs: libraryMatch.carbs, fats: libraryMatch.fats, fiber: libraryMatch.fiber || 0, sugar: libraryMatch.sugar || 0 });
+      setFood({ food_name: libraryMatch.food_name, calories: libraryMatch.calories, protein: libraryMatch.protein, carbs: libraryMatch.carbs, fats: libraryMatch.fats, fiber: libraryMatch.fiber || 0, sugar: libraryMatch.sugar || 0, nationality: "Indian 🇮🇳" });
       setGrams(100);
       setSearching(false);
       return;
     }
 
     const result = await api.integrations.Core.InvokeLLM({
-      prompt: `Give me nutritional data per 100g for: "${query}". Return accurate data.`,
+      prompt: `Give me nutritional data per 100g for: "${query}". Return accurate data. Also include the nationality/cuisine origin of the food (e.g. "Indian", "Italian", "Chinese", "Mexican", "American", "Japanese", etc.).`,
       response_json_schema: {
         type: "object",
         properties: {
           food_name: { type: "string" },
+          nationality: { type: "string" },
           calories: { type: "number" },
           protein: { type: "number" },
           carbs: { type: "number" },
@@ -114,7 +134,14 @@ export default function PortionCalculator({ onLog }) {
               <button key={item.food_name} onMouseDown={() => selectResult(item)}
                 className="w-full flex items-center justify-between px-4 py-3 hover:bg-violet-50 dark:hover:bg-violet-900/20 border-b border-gray-50 dark:border-gray-800 last:border-0 text-left">
                 <div>
-                  <p className="text-sm font-medium text-gray-800 dark:text-white">{item.food_name}</p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-sm font-medium text-gray-800 dark:text-white">{item.food_name}</p>
+                    {item.nationality && (
+                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium">
+                        {nationalityFlag(item.nationality)} {item.nationality}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-400">P: {item.protein}g · C: {item.carbs}g · F: {item.fats}g</p>
                 </div>
                 <span className="text-sm font-bold text-violet-600">{item.calories} kcal</span>
@@ -151,7 +178,14 @@ export default function PortionCalculator({ onLog }) {
           {calc && (
             <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-2xl p-4">
               <div className="flex items-center justify-between mb-3">
-                <p className="font-bold text-gray-900 dark:text-white text-sm">{food.food_name}</p>
+                <div>
+                  <p className="font-bold text-gray-900 dark:text-white text-sm">{food.food_name}</p>
+                  {food.nationality && (
+                    <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium mt-0.5">
+                      <Globe className="w-3 h-3" /> {food.nationality}
+                    </span>
+                  )}
+                </div>
                 <span className="text-xs text-gray-400">{grams}g portion</span>
               </div>
               <div className="grid grid-cols-2 gap-2 mb-3">
@@ -178,7 +212,7 @@ export default function PortionCalculator({ onLog }) {
               {onLog && (
                 <button onClick={() => onLog({ food_name: food.food_name, calories: calc.calories, protein: parseFloat(calc.protein), carbs: parseFloat(calc.carbs), fats: parseFloat(calc.fats), quantity: grams, unit: "g" })}
                   className="w-full mt-3 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-500 text-white text-sm font-bold min-h-[44px] transition-all hover:shadow-md">
-                  + Log to Calorie Tracker
+                  + Add to Calorie Tracker
                 </button>
               )}
             </div>

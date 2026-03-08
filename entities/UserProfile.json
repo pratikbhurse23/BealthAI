@@ -2,6 +2,10 @@
   "name": "UserProfile",
   "type": "object",
   "properties": {
+    "display_name": {
+      "type": "string",
+      "description": "User's display name"
+    },
     "age": {
       "type": "number",
       "description": "User's age in years"
@@ -32,9 +36,15 @@
       "default": "sedentary",
       "description": "Daily activity level"
     },
-    "weight_goal": {
+    "goal_type": {
       "type": "string",
-      "description": "Weight goal e.g. Lose 5kg, Gain 3kg, Maintain"
+      "enum": [
+        "lose",
+        "maintain",
+        "gain"
+      ],
+      "default": "maintain",
+      "description": "User's weight goal type"
     },
     "goal_weight_kg": {
       "type": "number",
@@ -46,11 +56,27 @@
     },
     "medical_conditions": {
       "type": "string",
-      "description": "JSON string of medical conditions (diabetes, hypertension, heart)"
+      "description": "JSON string of medical conditions (diabetes, hypertension, heart, thyroid, pcos, kidney)"
     },
     "doctor_calorie_target": {
       "type": "number",
       "description": "Doctor-prescribed daily calorie target for users with medical conditions"
+    },
+    "preferred_language": {
+      "type": "string",
+      "description": "User's preferred app language code (e.g. en, hi, mr)"
+    },
+    "goal_deadline": {
+      "type": "string",
+      "description": "ISO date string of target deadline for weight goal"
+    },
+    "diet_preference": {
+      "type": "string",
+      "description": "Diet preference: veg, nonveg, vegan, jain"
+    },
+    "disability_notes": {
+      "type": "string",
+      "description": "Disability or other medical notes"
     }
   },
   "required": [

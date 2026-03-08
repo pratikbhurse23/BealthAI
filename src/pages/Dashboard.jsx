@@ -8,6 +8,8 @@ import { Flame, Target, Activity, User, ArrowRight, TrendingDown, TrendingUp, Mi
 import { calorieStore } from "../components/localStore";
 import { calcBMR, calcTDEE, calcCalorieBudget, calcGoalProgress } from "../components/bmr";
 import WeightLossTimer from "../components/dashboard/WeightLossTimer";
+import AINutritionCoach from "../components/dashboard/AINutritionCoach";
+import DietPlanGenerator from "../components/dashboard/DietPlanGenerator";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -118,6 +120,12 @@ export default function Dashboard() {
             ))}
           </div>
         </motion.div>
+
+        {/* AI Nutrition Coach */}
+        <AINutritionCoach profile={profile} todayLogs={todayLogs} calorieBudget={budget} />
+
+        {/* AI Diet Plan Generator */}
+        <DietPlanGenerator profile={profile} todayLogs={todayLogs} />
 
         {/* Goal Progress Card */}
         {profile?.weight_goal && (

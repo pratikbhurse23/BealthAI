@@ -27,10 +27,17 @@ export default function AnalysisResult({ analysis, showPortionCalculator = true 
             <Utensils className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{analysis.food_name}</h2>
-            {analysis.serving_size && (
-              <p className="text-sm text-gray-500">Serving: {analysis.serving_size}</p>
-            )}
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{analysis.food_name}</h2>
+            <div className="flex items-center gap-2 flex-wrap mt-0.5">
+              {analysis.serving_size && (
+                <p className="text-sm text-gray-500">Serving: {analysis.serving_size}</p>
+              )}
+              {analysis.nationality && (
+                <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium">
+                  {analysis.nationality}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <HealthBadge category={analysis.food_category} />

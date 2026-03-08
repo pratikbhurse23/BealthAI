@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { createPageUrl } from "./utils";
 import { useAuth } from './lib/AuthContext';
-import { Camera, History, Salad, Activity, ChevronLeft, Moon, Sun, Trash2, MoreVertical, LayoutDashboard, User, Dumbbell, ScanLine } from "lucide-react";
+import { Camera, History, Salad, Activity, ChevronLeft, Moon, Sun, Trash2, LayoutDashboard, User, Dumbbell, ScanLine } from "lucide-react";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -29,33 +29,13 @@ function useDarkMode() {
   return [dark, setDark];
 }
 
-function DeleteAllDataButton() {
-  const [confirm, setConfirm] = React.useState(false);
-  const handleDelete = () => {
-    if (!confirm) { setConfirm(true); setTimeout(() => setConfirm(false), 3000); return; }
-    localStorage.clear();
-    window.location.reload();
-  };
-  return (
-    <button
-      onClick={handleDelete}
-      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all min-h-[44px] ${confirm
-        ? "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400"
-        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-        }`}
-    >
-      <Trash2 className="w-3.5 h-3.5" />
-      {confirm ? "Tap again to confirm" : "Delete All Data"}
-    </button>
-  );
-}
 
 export default function Layout({ children, currentPageName }) {
   const { user } = useAuth();
   const [dark, setDark] = useDarkMode();
-  const [showMenu, setShowMenu] = React.useState(false);
+
   const navigate = useNavigate();
-  const isRoot = currentPageName === "Home";
+  const isRoot = currentPageName === "FoodScanner";
 
   React.useEffect(() => {
     async function load() {
@@ -105,7 +85,7 @@ export default function Layout({ children, currentPageName }) {
       {/* Desktop Nav */}
       <nav className="hidden md:flex items-center justify-between px-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50"
         style={{ paddingTop: "calc(1rem + var(--safe-top))", paddingBottom: "1rem" }}>
-        <Link to={createPageUrl("Home")} className="flex items-center gap-2.5 no-select">
+        <Link to={createPageUrl("FoodScanner")} className="flex items-center gap-2.5 no-select">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
             <Camera className="w-5 h-5 text-white" />
           </div>
@@ -152,19 +132,6 @@ export default function Layout({ children, currentPageName }) {
           >
             {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
-          <div className="relative ml-1">
-            <button onClick={() => setShowMenu(m => !m)} className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-              <MoreVertical className="w-4 h-4" />
-            </button>
-            {showMenu && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                <div className="absolute right-0 top-10 z-50 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl p-1 min-w-[180px]">
-                  <DeleteAllDataButton />
-                </div>
-              </>
-            )}
-          </div>
         </div>
       </nav>
 
@@ -182,7 +149,7 @@ export default function Layout({ children, currentPageName }) {
             Back
           </button>
         ) : (
-          <Link to={createPageUrl("Home")} className="flex items-center gap-2 no-select">
+          <Link to={createPageUrl("FoodScanner")} className="flex items-center gap-2 no-select">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
               <Camera className="w-4 h-4 text-white" />
             </div>
@@ -205,19 +172,6 @@ export default function Layout({ children, currentPageName }) {
           >
             {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
-          <div className="relative">
-            <button onClick={() => setShowMenu(m => !m)} className="p-2 rounded-xl text-gray-500 dark:text-gray-400">
-              <MoreVertical className="w-4 h-4" />
-            </button>
-            {showMenu && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                <div className="absolute right-0 top-10 z-50 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl p-1 min-w-[180px]">
-                  <DeleteAllDataButton />
-                </div>
-              </>
-            )}
-          </div>
         </div>
       </header>
 
